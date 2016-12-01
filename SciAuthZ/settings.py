@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 import os
 import base64
 from django.utils.crypto import get_random_string
+from os.path import normpath, join, dirname, abspath
 
 chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 
@@ -116,7 +117,7 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    'JWT_SECRET_KEY': base64.b64decode(os.environ.get("AUTH0_SECRET"), '-_'),
+    'JWT_SECRET_KEY': base64.b64decode(os.environ.get("AUTH0_SECRET", ""), '-_'),
     'JWT_AUDIENCE': os.environ.get("AUTH0_CLIENT_ID"),
     'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'authorization.permissions.jwt_get_username_from_payload'
 }
@@ -134,11 +135,26 @@ USE_L10N = True
 
 USE_TZ = True
 
+# Absolute filesystem path to the Django project directory:
+DJANGO_ROOT = dirname(dirname(abspath(__file__)))
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/1.10/howto/static-files/
+# Absolute filesystem path to the top-level project folder:
+SITE_ROOT = dirname(DJANGO_ROOT)
 
+########## STATIC FILE CONFIGURATION
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
+# THIS IS WHERE FILES ARE COLLECTED INTO.
+STATIC_ROOT = normpath(join(SITE_ROOT, 'SciAuth', 'assets'))
+
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = '/static/'
+
+# THIS IS WHERE FILES ARE COLLECTED FROM
+# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
+STATICFILES_DIRS = (
+    normpath(join(SITE_ROOT, 'SciAuth', 'static')),
+)
+
 
 try:
     from .local_settings import *
