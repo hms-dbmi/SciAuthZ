@@ -116,8 +116,8 @@ REST_FRAMEWORK = {
 }
 
 JWT_AUTH = {
-    'JWT_SECRET_KEY': base64.b64decode(""),
-    'JWT_AUDIENCE': "",
+    'JWT_SECRET_KEY': base64.b64decode(os.environ.get("AUTH0_SECRET")),
+    'JWT_AUDIENCE': os.environ.get("AUTH0_CLIENT_ID"),
     'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'authorization.permissions.jwt_get_username_from_payload'
 }
 
