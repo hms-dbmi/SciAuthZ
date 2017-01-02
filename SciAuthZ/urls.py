@@ -21,9 +21,14 @@ from authorization import views
 
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
+router.register(r'authorization_requests', views.PermissionRequestsViewSet)
+router.register(r'authorizable_projects', views.AuthorizableProjectsViewSet)
+router.register(r'dua', views.DataUseAgreementViewSet)
+router.register(r'dua_sign', views.DataUseAgreementSignViewSet)
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user_permission/', views.UserPermissionListAPIView.as_view()),
+    url('^project_setup/(?P<project_key>.+)/$', views.ProjectSetupViewSet.as_view()),
     url(r'^', include(router.urls))
 ]
