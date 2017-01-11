@@ -60,8 +60,6 @@ class DataUseAgreementSignSerializer2(serializers.ModelSerializer):
         fields = ('data_use_agreement', 'user', 'date_signed')
 
 
-
-
 class ProjectSetupSerializer(serializers.ModelSerializer):
     dua = DataUseAgreementSerializer(source='duas', many=True)
 

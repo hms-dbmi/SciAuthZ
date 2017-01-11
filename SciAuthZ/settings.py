@@ -27,10 +27,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.environ.get("SECRET_KEY", get_random_string(50, chars))
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = ['authorization.aws.dbmi.hms.harvard.edu']
-
+DEBUG = False
 
 # Application definition
 
@@ -86,6 +83,41 @@ DATABASES = {
     }
 }
 
+# Internationalization
+# https://docs.djangoproject.com/en/1.10/topics/i18n/
+
+LANGUAGE_CODE = 'en-us'
+
+TIME_ZONE = 'UTC'
+
+USE_I18N = True
+
+USE_L10N = True
+
+USE_TZ = True
+
+#########
+#  STATIC FILE CONFIGURATION
+DJANGO_ROOT = dirname(dirname(abspath(__file__)))
+SITE_ROOT = dirname(DJANGO_ROOT)
+
+# THIS IS WHERE FILES ARE COLLECTED INTO.
+STATIC_ROOT = normpath(join(SITE_ROOT, 'SciAuthZ', 'assets'))
+
+# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
+STATIC_URL = '/static/'
+
+# THIS IS WHERE FILES ARE COLLECTED FROM
+# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
+STATICFILES_DIRS = (
+    normpath(join(SITE_ROOT, 'SciAuthZ', 'static')),
+)
+#########
+
+#########
+# Specific Configs
+ALLOWED_HOSTS = ['authorization.aws.dbmi.hms.harvard.edu']
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',
                                    'rest_framework.permissions.DjangoModelPermissions'),
@@ -102,40 +134,7 @@ JWT_AUTH = {
     'JWT_AUDIENCE': os.environ.get("AUTH0_CLIENT_ID"),
     'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'authorization.permissions.jwt_get_username_from_payload'
 }
-
-# Internationalization
-# https://docs.djangoproject.com/en/1.10/topics/i18n/
-
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'UTC'
-
-USE_I18N = True
-
-USE_L10N = True
-
-USE_TZ = True
-
-# Absolute filesystem path to the Django project directory:
-DJANGO_ROOT = dirname(dirname(abspath(__file__)))
-
-# Absolute filesystem path to the top-level project folder:
-SITE_ROOT = dirname(DJANGO_ROOT)
-
-########## STATIC FILE CONFIGURATION
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-root
-# THIS IS WHERE FILES ARE COLLECTED INTO.
-STATIC_ROOT = normpath(join(SITE_ROOT, 'SciAuthZ', 'assets'))
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
-STATIC_URL = '/static/'
-
-# THIS IS WHERE FILES ARE COLLECTED FROM
-# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
-STATICFILES_DIRS = (
-    normpath(join(SITE_ROOT, 'SciAuthZ', 'static')),
-)
-
+#########
 
 try:
     from .local_settings import *
