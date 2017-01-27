@@ -78,8 +78,12 @@ WSGI_APPLICATION = 'SciAuthZ.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'sciauthz',
+        'USER': os.environ.get("MYSQL_USERNAME"),
+        'PASSWORD': os.environ.get("MYSQL_PASSWORD"),
+        'HOST': os.environ.get("MYSQL_HOST"),
+        'PORT': os.environ.get("MYSQL_PORT"),
     }
 }
 
@@ -116,7 +120,7 @@ STATICFILES_DIRS = (
 
 #########
 # Specific Configs
-ALLOWED_HOSTS = ['authorization.aws.dbmi.hms.harvard.edu']
+ALLOWED_HOSTS = ['.dbmi.hms.harvard.edu']
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',
