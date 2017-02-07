@@ -29,8 +29,6 @@ def jwt_get_username_from_payload(payload):
         print("User not found, creating.")
 
         user = User(username=payload.get('email'), email=payload.get('email'))
-        user.is_staff = True
-        user.is_superuser = True
         user.save()
 
     return payload.get('email')
