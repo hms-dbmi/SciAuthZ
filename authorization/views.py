@@ -13,6 +13,13 @@ from authorization.models import UserPermission, \
     DataUseAgreement
 from django.contrib.auth.models import User
 from authorization.permissions import IsAssociatedUser
+from pyauth0jwt.auth0authenticate import user_auth_and_jwt
+from django.http import HttpResponse
+
+
+@user_auth_and_jwt
+def login(request):
+    return HttpResponse("SENT")
 
 
 class UserPermissionListAPIView(generics.ListAPIView):

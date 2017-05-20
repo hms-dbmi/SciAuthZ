@@ -30,5 +30,6 @@ urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^user_permission/', views.UserPermissionListAPIView.as_view()),
     url('^project_setup/(?P<project_key>.+)/$', views.ProjectSetupViewSet.as_view()),
+    url(r'^login/', views.login),
     url(r'^', include(router.urls))
 ]
