@@ -48,6 +48,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -100,23 +101,24 @@ USE_L10N = True
 
 USE_TZ = True
 
-#########
-#  STATIC FILE CONFIGURATION
+
+##########
+# STATIC FILE CONFIGURATION
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))
 SITE_ROOT = dirname(DJANGO_ROOT)
-
 # THIS IS WHERE FILES ARE COLLECTED INTO.
 STATIC_ROOT = normpath(join(SITE_ROOT, 'SciAuthZ', 'assets'))
-
-# See: https://docs.djangoproject.com/en/dev/ref/settings/#static-url
 STATIC_URL = '/static/'
 
 # THIS IS WHERE FILES ARE COLLECTED FROM
-# See: https://docs.djangoproject.com/en/dev/ref/contrib/staticfiles/#std:setting-STATICFILES_DIRS
 STATICFILES_DIRS = (
     normpath(join(SITE_ROOT, 'SciAuthZ', 'static')),
 )
-#########
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
 
 #########
 # Specific Configs
@@ -127,9 +129,8 @@ REST_FRAMEWORK = {
                                    'rest_framework.permissions.DjangoModelPermissions'),
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+        'pyauth0jwtrest.auth0authenticaterest.Auth0JSONWebTokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication'
     ),
 }
 
@@ -138,6 +139,11 @@ JWT_AUTH = {
     'JWT_AUDIENCE': os.environ.get("AUTH0_CLIENT_ID"),
     'JWT_PAYLOAD_GET_USERNAME_HANDLER': 'authorization.permissions.jwt_get_username_from_payload'
 }
+
+AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
+
+AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
+
 #########
 
 try:
