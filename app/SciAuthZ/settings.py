@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'authorization'
+    'authorization',
+    'pyauth0jwt'
 ]
 
 MIDDLEWARE = [
@@ -145,8 +146,6 @@ AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
 AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
 
 #########
-
-
 
 LOGGING = {
     'version': 1,
