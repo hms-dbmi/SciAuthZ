@@ -6,6 +6,7 @@ DJANGO_SECRET=$(/vault/vault read -field=value $VAULT_PATH/django_secret)
 AUTH0_DOMAIN_VAULT=$(/vault/vault read -field=value $VAULT_PATH/auth0_domain)
 AUTH0_CLIENT_ID_VAULT=$(/vault/vault read -field=value $VAULT_PATH/auth0_client_id)
 AUTH0_SECRET_VAULT=$(/vault/vault read -field=value $VAULT_PATH/auth0_secret)
+AUTHENTICATION_LOGIN_URL=$(/vault/vault read -field=value $VAULT_PATH/account_server_url)
 
 MYSQL_USERNAME_VAULT=$(/vault/vault read -field=value $VAULT_PATH/mysql_username)
 MYSQL_PASSWORD_VAULT=$(/vault/vault read -field=value $VAULT_PATH/mysql_pw)
@@ -16,6 +17,7 @@ export SECRET_KEY=$DJANGO_SECRET
 export AUTH0_DOMAIN=$AUTH0_DOMAIN_VAULT
 export AUTH0_CLIENT_ID=$AUTH0_CLIENT_ID_VAULT
 export AUTH0_SECRET=$AUTH0_SECRET_VAULT
+export AUTHENTICATION_LOGIN_URL
 
 export MYSQL_USERNAME=$MYSQL_USERNAME_VAULT
 export MYSQL_PASSWORD=$MYSQL_PASSWORD_VAULT
