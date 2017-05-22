@@ -30,6 +30,10 @@ echo $SSL_CERT_CHAIN | base64 -d >> /etc/nginx/ssl/server.crt
 
 cd /app/
 
+if [ ! -d static ]; then
+    mkdir static
+fi
+
 python manage.py migrate
 python manage.py collectstatic --no-input
 python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('$FIRST_ADMIN_EMAIL', '$FIRST_ADMIN_EMAIL', '')" || echo "Super User already exists."
