@@ -34,7 +34,7 @@
     "pk": 1,
     "fields": {
       "name": "Berson DUA",
-      "project": "BERSON",
+      "project": 1,
       "agreement_text": "<h3>Requesting Access to the Eliot L. Berson Database</h3><br /><br />By clicking below you'll notify the administrator that you are interested in accessing the Berson Database. We will contact you with instructions on obtaining the data after reviewing your request."
     }
   }
