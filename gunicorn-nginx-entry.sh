@@ -28,7 +28,7 @@ SSL_CERT_CHAIN=$(/vault/vault read -field=value $VAULT_PATH/ssl_cert_chain)
 echo $SSL_KEY | base64 -d >> /etc/nginx/ssl/server.key
 echo $SSL_CERT_CHAIN | base64 -d >> /etc/nginx/ssl/server.crt
 
-cd /SciAuthZ/
+cd /app/
 
 python manage.py migrate
 python manage.py collectstatic --no-input
