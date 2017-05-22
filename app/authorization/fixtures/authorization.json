@@ -1,0 +1,32 @@
+[
+  {
+    "model": "authorization.AuthorizableProject",
+    "pk": 1,
+    "fields": {
+      "name": "Eliot L. Berson Database",
+      "project_key": "BERSON",
+      "permission_scheme": "PRIVATE",
+      "dua_required": "False"
+    }
+  },
+  {
+    "model": "authorization.AuthorizableProject",
+    "pk": 2,
+    "fields": {
+      "name": "NHANES",
+      "project_key": "NHANES",
+      "permission_scheme": "PUBLIC",
+      "dua_required": "False"
+    }
+  },
+  {
+    "model": "authorization.AuthorizableProject",
+    "pk": 3,
+    "fields": {
+      "name": "GRDR",
+      "project_key": "GRDR",
+      "permission_scheme": "PRIVATE",
+      "dua_required": "True"
+    }
+  }
+]

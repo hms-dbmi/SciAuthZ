@@ -38,6 +38,7 @@ fi
 
 python manage.py migrate
 python manage.py collectstatic --no-input
+python manage.py loaddata authorization
 python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('$FIRST_ADMIN_EMAIL', '$FIRST_ADMIN_EMAIL', '')" || echo "Super User already exists."
 
 /etc/init.d/nginx restart
