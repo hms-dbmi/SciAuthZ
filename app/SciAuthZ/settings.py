@@ -14,6 +14,7 @@ import os
 import base64
 from django.utils.crypto import get_random_string
 from os.path import normpath, join, dirname, abspath
+import sys
 
 chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 
@@ -39,7 +40,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'authorization'
+    'authorization',
+    'pyauth0jwt'
 ]
 
 MIDDLEWARE = [
@@ -105,14 +107,13 @@ USE_TZ = True
 ##########
 # STATIC FILE CONFIGURATION
 DJANGO_ROOT = dirname(dirname(abspath(__file__)))
-SITE_ROOT = dirname(DJANGO_ROOT)
 # THIS IS WHERE FILES ARE COLLECTED INTO.
-STATIC_ROOT = normpath(join(SITE_ROOT, 'SciAuthZ', 'assets'))
+STATIC_ROOT = normpath(join(DJANGO_ROOT, 'assets'))
 STATIC_URL = '/static/'
 
 # THIS IS WHERE FILES ARE COLLECTED FROM
 STATICFILES_DIRS = (
-    normpath(join(SITE_ROOT, 'SciAuthZ', 'static')),
+    normpath(join(DJANGO_ROOT, 'static')),
 )
 
 STATICFILES_FINDERS = (
@@ -144,7 +145,43 @@ AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
 
 AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
 
+AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
+AUTH0_SECRET = os.environ.get("AUTH0_SECRET")
+AUTH0_SUCCESS_URL = os.environ.get("AUTH0_SUCCESS_URL")
+AUTH0_LOGOUT_URL = os.environ.get("AUTH0_LOGOUT_URL")
+
 #########
+
+LOGGING = {
+    'version': 1,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'stream': sys.stdout,
+        },
+        'file_debug': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'debug.log',
+        },
+        'file_error': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': 'error.log',
+        }
+    },
+    'root': {
+        'handlers': ['console', 'file_debug'],
+        'level': 'DEBUG'
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file_error'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
 
 try:
     from .local_settings import *
