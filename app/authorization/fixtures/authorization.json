@@ -25,7 +25,7 @@
     "fields": {
       "name": "GRDR",
       "project_key": "GRDR",
-      "permission_scheme": "PRIVATE",
+      "permission_scheme": "PUBLIC",
       "dua_required": "True"
     }
   },
