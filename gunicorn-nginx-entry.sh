@@ -11,6 +11,8 @@ MYSQL_PASSWORD_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_pw --with-d
 MYSQL_HOST_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_host --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 MYSQL_PORT_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_port --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
+FIRST_ADMIN_EMAIL=$(aws ssm get-parameters --names $PS_PATH.first_admin_email --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+
 export SECRET_KEY=$DJANGO_SECRET
 export AUTH0_DOMAIN=$AUTH0_DOMAIN_VAULT
 export AUTH0_CLIENT_ID=$AUTH0_CLIENT_ID_VAULT
