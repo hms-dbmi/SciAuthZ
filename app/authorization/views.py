@@ -35,15 +35,20 @@ class UserPermissionListAPIView(generics.ListAPIView):
         return UserPermission.objects.filter(user=user)
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API View for User Model.
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticated, IsAssociatedUser,)
+
+    def get_queryset(self):
+        user = self.request.user
+        return User.objects.filter(email=user.email)
 
 
-class AuthorizableProjectsViewSet(viewsets.ModelViewSet):
+class AuthorizableProjectsViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API View for AuthorizableProject Model.
     """
@@ -81,7 +86,7 @@ class PermissionRequestsViewSet(viewsets.ModelViewSet):
         return UserPermissionRequest.objects.filter(user=user)
 
 
-class DataUseAgreementViewSet(viewsets.ModelViewSet):
+class DataUseAgreementViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API View for DUA
     """
