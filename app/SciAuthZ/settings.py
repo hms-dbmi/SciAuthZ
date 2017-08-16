@@ -16,6 +16,8 @@ from django.utils.crypto import get_random_string
 from os.path import normpath, join, dirname, abspath
 import sys
 
+from pythonpstore.pythonpstore import SecretStore
+
 chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -29,6 +31,10 @@ SECRET_KEY = os.environ.get("SECRET_KEY", get_random_string(50, chars))
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
+
+secret_store = SecretStore()
+PARAMETER_PATH = os.environ.get("PS_PATH", "")
+ALLOWED_HOSTS = [secret_store.get_secret_for_key(PARAMETER_PATH + '.allowed_hosts')]
 
 # Application definition
 
@@ -123,7 +129,6 @@ STATICFILES_FINDERS = (
 
 #########
 # Specific Configs
-ALLOWED_HOSTS = ['.dbmi.hms.harvard.edu']
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',
