@@ -37,8 +37,10 @@ PARAMETER_PATH = os.environ.get("PS_PATH", None)
 
 if PARAMETER_PATH:
     ALLOWED_HOSTS = [secret_store.get_secret_for_key(PARAMETER_PATH + '.allowed_hosts')]
+    RAVEN_URL = secret_store.get_secret_for_key(PARAMETER_PATH + '.raven_url')
 else:
     ALLOWED_HOSTS = ["localhost"]
+    RAVEN_URL = ""
 
 # Application definition
 
@@ -51,7 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'authorization',
-    'pyauth0jwt'
+    'pyauth0jwt',
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [
@@ -190,6 +193,13 @@ LOGGING = {
             'propagate': True,
         },
     },
+}
+
+RAVEN_CONFIG = {
+    'dsn': RAVEN_URL,
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': '1',
 }
 
 try:
