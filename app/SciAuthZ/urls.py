@@ -14,10 +14,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  url(r'^blog/', include('blog.urls'))
 """
 from django.conf.urls import url, include
+from django.views.defaults import page_not_found
 from django.contrib import admin
 
 from rest_framework import routers
 from authorization import views
+from .views import ht
 
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
@@ -27,9 +29,11 @@ router.register(r'dua', views.DataUseAgreementViewSet)
 router.register(r'dua_sign', views.DataUseAgreementSignViewSet)
 
 urlpatterns = [
+    url(r'^admin/login/', page_not_found, {'exception': Exception('Admin form login disabled.')}),
     url(r'^admin/', admin.site.urls),
     url(r'^user_permission/', views.UserPermissionListAPIView.as_view()),
     url('^project_setup/(?P<project_key>.+)/$', views.ProjectSetupViewSet.as_view()),
     url(r'^login/', views.login),
+    url(r'^ht/', ht),
     url(r'^', include(router.urls))
 ]
