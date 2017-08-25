@@ -16,6 +16,8 @@ from django.utils.crypto import get_random_string
 from os.path import normpath, join, dirname, abspath
 import sys
 
+from pythonpstore.pythonpstore import SecretStore
+
 chars = 'abcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*(-_=+)'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -30,6 +32,16 @@ SECRET_KEY = os.environ.get("SECRET_KEY", get_random_string(50, chars))
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
+secret_store = SecretStore()
+PARAMETER_PATH = os.environ.get("PS_PATH", None)
+
+if PARAMETER_PATH:
+    ALLOWED_HOSTS = [secret_store.get_secret_for_key(PARAMETER_PATH + '.allowed_hosts')]
+    RAVEN_URL = secret_store.get_secret_for_key(PARAMETER_PATH + '.raven_url')
+else:
+    ALLOWED_HOSTS = ["localhost"]
+    RAVEN_URL = ""
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -41,7 +53,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'authorization',
-    'pyauth0jwt'
+    'pyauth0jwt',
+    'raven.contrib.django.raven_compat',
 ]
 
 MIDDLEWARE = [
@@ -123,7 +136,6 @@ STATICFILES_FINDERS = (
 
 #########
 # Specific Configs
-ALLOWED_HOSTS = ['.dbmi.hms.harvard.edu']
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',
@@ -181,6 +193,13 @@ LOGGING = {
             'propagate': True,
         },
     },
+}
+
+RAVEN_CONFIG = {
+    'dsn': RAVEN_URL,
+    # If you are using git, you can also automatically configure the
+    # release based on the git info.
+    'release': '1',
 }
 
 try:
