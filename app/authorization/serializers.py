@@ -2,6 +2,7 @@ from authorization.models import UserPermission, AuthorizableProject, UserPermis
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.db import models
+import os
 
 
 class UserPermissionSerializer(serializers.ModelSerializer):
@@ -27,10 +28,19 @@ class AuthorizableProjectSerializer(serializers.ModelSerializer):
 
 class DataUseAgreementSerializer(serializers.ModelSerializer):
     project = serializers.SlugRelatedField(slug_field='project_key', read_only=True)
+    agreement_form = serializers.SerializerMethodField()
 
     class Meta:
         model = DataUseAgreement
-        fields = ('name', 'agreement_text', 'project')
+        fields = ('name', 'agreement_text', 'project', 'agreement_form')
+
+    # If there is an agreement form file, grab the html contents
+    def get_agreement_form(self, dua):
+        if dua.agreement_form_file != "":
+            form_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/templates/duaforms/' + dua.agreement_form_file
+            return open(form_path, 'r').read()
+        else:
+            return dua.agreement_form
 
 
 class PermissionRequestSerializer(serializers.ModelSerializer):
@@ -48,16 +58,7 @@ class DataUseAgreementSignSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = DataUseAgreementSign
-        fields = ('data_use_agreement', 'user', 'date_signed')
-
-
-class DataUseAgreementSignSerializer2(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(slug_field='username', read_only=False, queryset=User.objects.all())
-    data_use_agreement = serializers.SlugRelatedField(slug_field='name', read_only=False, queryset=DataUseAgreement.objects.all())
-
-    class Meta:
-        model = DataUseAgreementSign
-        fields = ('data_use_agreement', 'user', 'date_signed')
+        fields = ('data_use_agreement', 'user', 'date_signed', 'agreement_text')
 
 
 class ProjectSetupSerializer(serializers.ModelSerializer):
