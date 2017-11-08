@@ -30,12 +30,33 @@
     }
   },
   {
+    "model": "authorization.AuthorizableProject",
+    "pk": 4,
+    "fields": {
+      "name": "NLP",
+      "project_key": "NLP",
+      "permission_scheme": "PRIVATE",
+      "dua_required": "True"
+    }
+  },
+  {
     "model": "authorization.DataUseAgreement",
     "pk": 1,
     "fields": {
       "name": "Berson DUA",
       "project": 1,
-      "agreement_text": "<h3>Requesting Access to the Eliot L. Berson Database</h3><br /><br />By clicking below you'll notify the administrator that you are interested in accessing the Berson Database. We will contact you with instructions on obtaining the data after reviewing your request."
+      "agreement_text": "<h3>Requesting Access to the Eliot L. Berson Database</h3><br /><br />By clicking below you'll notify the administrator that you are interested in accessing the Berson Database. We will contact you with instructions on obtaining the data after reviewing your request.",
+      "agreement_form_file": ""
+    }
+  },
+  {
+    "model": "authorization.DataUseAgreement",
+    "pk": 2,
+    "fields": {
+      "name": "NLP",
+      "project": 4,
+      "agreement_text": "",
+      "agreement_form_file": "nlp.html" 
     }
   }
 ]

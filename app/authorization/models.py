@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 
 class AuthorizableProject(models.Model):
@@ -43,14 +44,23 @@ class UserPermission(models.Model):
 
 class DataUseAgreement(models.Model):
     """
-    This is the text for the data use agreement associated with a project.
+    This is the text for the data use agreement associated with a project. The agreement_form field should be the name of the html file (with extension)
+    that contains the form. This file should be in the templates/duaforms/ directory. If no form is being used, leave the field blank and instead 
+    enter some text in the the agreement_text field.
     """
     name = models.CharField(max_length=100, blank=False, null=False, verbose_name="name")
     project = models.ForeignKey(AuthorizableProject, related_name='duas')
-    agreement_text = models.TextField()
+    agreement_text = models.TextField(blank=True)
+    agreement_form_file = models.CharField(max_length=50, blank=True)
 
     def __str__(self):
         return '%s %s' % (self.id, self.name)
+    
+    def clean(self):
+        if self.agreement_text != "" and self.agreement_form_file != "":
+            raise ValidationError('Cannot have both an agreement_text and agreement_form_file. Please choose one.')
+        if self.agreement_text == "" and self.agreement_form_file == "":
+            raise ValidationError('Either the agreement_text or agreement_form_file must have a value.')
 
 
 class DataUseAgreementSign(models.Model):
@@ -60,3 +70,4 @@ class DataUseAgreementSign(models.Model):
     data_use_agreement = models.ForeignKey(DataUseAgreement)
     user = models.ForeignKey(User)
     date_signed = models.DateTimeField(auto_now_add=True)
+    agreement_text = models.TextField(blank=False)
