@@ -53,10 +53,20 @@
     "model": "authorization.DataUseAgreement",
     "pk": 2,
     "fields": {
-      "name": "NLP",
+      "name": "Academic",
       "project": 4,
       "agreement_text": "",
-      "agreement_form_file": "nlp.html" 
+      "agreement_form_file": "nlp-academic.html" 
+    }
+  },
+  {
+    "model": "authorization.DataUseAgreement",
+    "pk": 3,
+    "fields": {
+      "name": "Commercial",
+      "project": 4,
+      "agreement_text": "",
+      "agreement_form_file": "nlp-commercial.html" 
     }
   }
 ]
