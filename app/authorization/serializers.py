@@ -39,8 +39,6 @@ class DataUseAgreementSerializer(serializers.ModelSerializer):
         if dua.agreement_form_file != "":
             form_path = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) + '/templates/duaforms/' + dua.agreement_form_file
             return open(form_path, 'r').read()
-        else:
-            return dua.agreement_text
 
 
 class PermissionRequestSerializer(serializers.ModelSerializer):
