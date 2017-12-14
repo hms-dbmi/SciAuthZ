@@ -11,6 +11,7 @@ class AuthorizableProject(models.Model):
     project_key = models.CharField(max_length=100, blank=False, null=False, verbose_name="Project Key")
     permission_scheme = models.CharField(max_length=100, default="PRIVATE", verbose_name="Permission Scheme")
     dua_required = models.BooleanField(default=True)
+    project_manager = models.ForeignKey(User, null=True)
 
     def __str__(self):
         return '%s %s' % (self.project_key, self.name)
