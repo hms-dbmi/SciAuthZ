@@ -145,6 +145,7 @@ REST_FRAMEWORK = {
         'pyauth0jwtrest.auth0authenticaterest.Auth0JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication'
     ),
+    'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S'
 }
 
 JWT_AUTH = {
