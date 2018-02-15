@@ -9,7 +9,10 @@ from django.contrib.auth.models import User
 from authorization.permissions import IsAssociatedUser
 from pyauth0jwt.auth0authenticate import user_auth_and_jwt
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404
+
+from rest_framework.decorators import list_route
+from rest_framework.response import Response
+from datetime import datetime
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,6 +20,7 @@ logger = logging.getLogger(__name__)
 @user_auth_and_jwt
 def login(request):
     return HttpResponse("SENT")
+
 
 def get_objects_with_permissions(requested_object_type, requesting_user, requested_user, record_id=None, item=None):
     # If a specific record is requested, confirm the requesting user either is the owner of it or
@@ -75,6 +79,33 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
 
         return get_objects_with_permissions(UserPermission, requesting_user, requested_user, record_id, item)
 
+    @list_route(methods=['post'])
+    def create_registration_permission_record(self, request):
+
+        grantee = request.data['grantee_email']
+
+        logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Creating profile permission for user %s' % request.user.email)
+
+        item_permission_string = "SciReg.n2c2.profile." + request.user.email
+        object_permission = "VIEW"
+
+        grantee_user, created = User.objects.get_or_create(username=grantee, email=grantee)
+
+        if created:
+            logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Created Grantee %s' % grantee_user)
+
+        new_user_permission, created = UserPermission.objects.get_or_create(item=item_permission_string,
+                                                                            user=grantee_user,
+                                                                            permission=object_permission,
+                                                                            date_updated=datetime.now())
+
+        logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Created %s' % new_user_permission)
+
+        serializer = self.get_serializer(new_user_permission)
+        return Response(serializer.data)
+
+
+
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API View for User Model.
@@ -109,6 +140,7 @@ class PermissionRequestsViewSet(viewsets.ModelViewSet):
         user_email = self.request.user
         user = User.objects.get(username=user_email)
         serializer.save(user=user)
+
 
 # NOTE While the IsAssociatedUser permissions here works for PUTs, they are not used for GETs. 
 # Any user can GET all permissions. Is this an issue?
