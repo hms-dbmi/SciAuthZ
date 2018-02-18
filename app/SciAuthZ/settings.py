@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'authorization',
     'pyauth0jwt',
     'raven.contrib.django.raven_compat',
+    'django_nose',
 ]
 
 MIDDLEWARE = [
@@ -210,6 +211,8 @@ RAVEN_CONFIG = {
     # release based on the git info.
     'release': '1',
 }
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 try:
     from .local_settings import *
