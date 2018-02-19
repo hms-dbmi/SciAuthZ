@@ -23,6 +23,7 @@ def login(request):
 
 
 def get_objects_with_permissions(requested_object_type, requesting_user, requested_user, record_id=None, item=None):
+
     # If a specific record is requested, confirm the requesting user either is the owner of it or
     # has MANAGE permissions on that kind of item
     if record_id is not None:
@@ -86,7 +87,7 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
 
         logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Creating profile permission for user %s' % request.user.email)
 
-        item_permission_string = "SciReg.n2c2.profile." + request.user.email
+        item_permission_string = "SciReg.n2c2-t1.profile." + request.user.email
         object_permission = "VIEW"
 
         grantee_user, created = User.objects.get_or_create(username=grantee, email=grantee)
@@ -105,7 +106,6 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
 class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     API View for User Model.
@@ -117,6 +117,7 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(email=user.email)
+
 
 class PermissionRequestsViewSet(viewsets.ModelViewSet):
     """

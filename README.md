@@ -18,8 +18,5 @@ JWT_AUTH = {
 }
 ~~~
 
-### Other configs
-~~~python
-# Django config, move this to an ENV in the future
-ALLOWED_HOSTS = ['authentication.aws.dbmi.hms.harvard.edu']
-~~~
+### Running Tests
+python manage.py test authorization.tests --settings SciAuthZ.test_settings
