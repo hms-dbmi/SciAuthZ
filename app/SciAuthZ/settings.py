@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'authorization',
     'pyauth0jwt',
     'raven.contrib.django.raven_compat',
+    'django_nose',
 ]
 
 MIDDLEWARE = [
@@ -145,6 +146,7 @@ REST_FRAMEWORK = {
         'pyauth0jwtrest.auth0authenticaterest.Auth0JSONWebTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication'
     ),
+    'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S'
 }
 
 JWT_AUTH = {
@@ -163,6 +165,14 @@ AUTH0_SUCCESS_URL = os.environ.get("AUTH0_SUCCESS_URL")
 AUTH0_LOGOUT_URL = os.environ.get("AUTH0_LOGOUT_URL")
 
 #########
+
+DEFAULT_FROM_EMAIL = 'sciauthz-no-reply@dbmi.hms.harvard.edu'
+EMAIL_BACKEND = 'django_smtp_ssl.SSLEmailBackend'
+EMAIL_USE_SSL = True
+EMAIL_HOST = os.environ.get("EMAIL_HOST")
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
+EMAIL_PORT = os.environ.get("EMAIL_PORT")
 
 LOGGING = {
     'version': 1,
@@ -201,6 +211,8 @@ RAVEN_CONFIG = {
     # release based on the git info.
     'release': '1',
 }
+
+TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
 
 try:
     from .local_settings import *

@@ -11,6 +11,11 @@ MYSQL_PASSWORD_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_pw --with-d
 MYSQL_HOST_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_host --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 MYSQL_PORT_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_port --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
+EMAIL_HOST=$(aws ssm get-parameters --names $PS_PATH.email_host --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+EMAIL_HOST_USER=$(aws ssm get-parameters --names $PS_PATH.email_host_user --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+EMAIL_HOST_PASSWORD=$(aws ssm get-parameters --names $PS_PATH.email_host_password --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+EMAIL_PORT=$(aws ssm get-parameters --names $PS_PATH.email_port --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+
 FIRST_ADMIN_EMAIL=$(aws ssm get-parameters --names $PS_PATH.first_admin_email --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
 export SECRET_KEY=$DJANGO_SECRET
@@ -23,6 +28,11 @@ export MYSQL_USERNAME=$MYSQL_USERNAME_VAULT
 export MYSQL_PASSWORD=$MYSQL_PASSWORD_VAULT
 export MYSQL_HOST=$MYSQL_HOST_VAULT
 export MYSQL_PORT=$MYSQL_PORT_VAULT
+
+export EMAIL_HOST
+export EMAIL_HOST_USER
+export EMAIL_HOST_PASSWORD
+export EMAIL_PORT
 
 SSL_KEY=$(aws ssm get-parameters --names $PS_PATH.ssl_key --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 SSL_CERT_CHAIN1=$(aws ssm get-parameters --names $PS_PATH.ssl_cert_chain1 --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')

@@ -24,15 +24,12 @@ from .views import ht
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
 router.register(r'authorization_requests', views.PermissionRequestsViewSet)
-router.register(r'authorizable_projects', views.AuthorizableProjectsViewSet)
-router.register(r'dua', views.DataUseAgreementViewSet)
-router.register(r'dua_sign', views.DataUseAgreementSignViewSet)
+router.register(r'authorization_request_change', views.PermissionRequestsChangeViewSet)
+router.register(r'user_permission', views.UserPermissionViewSet)
 
 urlpatterns = [
     url(r'^admin/login/', page_not_found, {'exception': Exception('Admin form login disabled.')}),
     url(r'^admin/', admin.site.urls),
-    url(r'^user_permission/', views.UserPermissionListAPIView.as_view()),
-    url('^project_setup/(?P<project_key>.+)/$', views.ProjectSetupViewSet.as_view()),
     url(r'^login/', views.login),
     url(r'^ht/', ht),
     url(r'^', include(router.urls))
