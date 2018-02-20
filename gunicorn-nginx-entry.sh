@@ -18,6 +18,9 @@ EMAIL_PORT=$(aws ssm get-parameters --names $PS_PATH.email_port --with-decryptio
 
 FIRST_ADMIN_EMAIL=$(aws ssm get-parameters --names $PS_PATH.first_admin_email --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
+ALLOWED_HOSTS=$(aws ssm get-parameters --names $PS_PATH.allowed_hosts --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+RAVEN_URL=$(aws ssm get-parameters --names $PS_PATH.raven_url --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+
 export SECRET_KEY=$DJANGO_SECRET
 export AUTH0_DOMAIN=$AUTH0_DOMAIN_VAULT
 export AUTH0_CLIENT_ID=$AUTH0_CLIENT_ID_VAULT
@@ -33,6 +36,9 @@ export EMAIL_HOST
 export EMAIL_HOST_USER
 export EMAIL_HOST_PASSWORD
 export EMAIL_PORT
+
+export ALLOWED_HOSTS
+export RAVEN_URL
 
 SSL_KEY=$(aws ssm get-parameters --names $PS_PATH.ssl_key --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 SSL_CERT_CHAIN1=$(aws ssm get-parameters --names $PS_PATH.ssl_cert_chain1 --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
