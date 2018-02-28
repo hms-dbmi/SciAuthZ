@@ -10,11 +10,13 @@ from authorization.serializers import UserSerializer
 from authorization.serializers import PermissionRequestSerializer
 from authorization.models import UserPermission
 from authorization.models import UserPermissionRequest
-from django.contrib.auth.models import User
 from authorization.permissions import IsAssociatedUser
 from pyauth0jwt.auth0authenticate import user_auth_and_jwt
-from django.http import HttpResponse
 from datetime import datetime
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from django.shortcuts import get_object_or_404
+from django.core.exceptions import ObjectDoesNotExist
 
 import logging
 logger = logging.getLogger(__name__)
@@ -113,6 +115,39 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Created %s' % new_user_permission)
 
         serializer = self.get_serializer(new_user_permission)
+        return Response(serializer.data)
+
+    @list_route(methods=['post'])
+    def remove_item_view_permission_record(self, request):
+
+        # The person getting the VIEW permission
+        grantee = request.data['grantee_email']
+        item = request.data['item']
+        object_permission = "VIEW"
+
+        # The person who authorizing this, presumably an admin or manager of the item
+        requesting_user = request.user
+
+        logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Removing VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, requesting_user.email))
+
+        # If the user does not have MANAGE permissions of the item, return 401
+        if UserPermission.objects.filter(item=item, user=requesting_user, permission="MANAGE").count() < 1:
+            logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Failed to remove VIEW permission. %s is not authorized to do this.' % requesting_user.email)
+            return Response('User is not authorized to remove this permission.', status=status.HTTP_401_UNAUTHORIZED)
+
+        try:
+            grantee_user = User.objects.get(username=grantee, email=grantee)
+        except ObjectDoesNotExist:
+            logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Failed to remove VIEW permission. %s user is not in our system.' % grantee)
+            return Response('User does not exist, no permissions for them.', status=status.HTTP_404_NOT_FOUND)
+
+        # Remove the permission if it exists
+        permission = get_object_or_404(UserPermission, item=item, user=grantee_user, permission=object_permission)
+        permission.delete()
+
+        logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Removed %s' % permission)
+
+        serializer = self.get_serializer(permission)
         return Response(serializer.data)
 
     @list_route(methods=['post'])
