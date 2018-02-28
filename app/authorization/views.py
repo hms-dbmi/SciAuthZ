@@ -1,5 +1,10 @@
-from rest_framework import viewsets, permissions, generics
+from rest_framework import viewsets
+from rest_framework import permissions
+from rest_framework import generics
+from rest_framework import status
+from rest_framework.decorators import list_route
 from rest_framework.decorators import detail_route
+from rest_framework.response import Response
 from authorization.serializers import UserPermissionSerializer
 from authorization.serializers import UserSerializer
 from authorization.serializers import PermissionRequestSerializer
@@ -9,9 +14,6 @@ from django.contrib.auth.models import User
 from authorization.permissions import IsAssociatedUser
 from pyauth0jwt.auth0authenticate import user_auth_and_jwt
 from django.http import HttpResponse
-
-from rest_framework.decorators import list_route
-from rest_framework.response import Response
 from datetime import datetime
 
 import logging
@@ -79,6 +81,39 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         requesting_user = self.request.user
 
         return get_objects_with_permissions(UserPermission, requesting_user, requested_user, record_id, item)
+
+    @list_route(methods=['post'])
+    def create_item_view_permission_record(self, request):
+
+        # The person getting the VIEW permission
+        grantee = request.data['grantee_email']
+        item = request.data['item']
+        object_permission = "VIEW"
+
+        # The person who authorizing this, presumably an admin or manager of the item
+        requesting_user = request.user
+
+        logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Creating VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, requesting_user.email))
+
+        # If the user does not have MANAGE permissions of the item, return 401
+        if UserPermission.objects.filter(item=item, user=requesting_user, permission="MANAGE").count() < 1:
+            logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Failed to create VIEW permission. %s is not authorized to do this.' % requesting_user.email)
+            return Response('User is not authorized to create this permission.', status=status.HTTP_401_UNAUTHORIZED)
+
+        grantee_user, created = User.objects.get_or_create(username=grantee, email=grantee)
+
+        if created:
+            logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Created Grantee %s' % grantee_user)
+
+        # Add the permission if it does not exist
+        new_user_permission, created = UserPermission.objects.get_or_create(item=item,
+                                                                            user=grantee_user,
+                                                                            permission=object_permission)
+
+        logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Created %s' % new_user_permission)
+
+        serializer = self.get_serializer(new_user_permission)
+        return Response(serializer.data)
 
     @list_route(methods=['post'])
     def create_registration_permission_record(self, request):
