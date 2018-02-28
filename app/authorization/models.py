@@ -28,7 +28,7 @@ class UserPermission(models.Model):
     user = models.ForeignKey(User)
     item = models.CharField(max_length=100, blank=False, null=False, verbose_name="Item")
     permission = models.CharField(max_length=100, blank=False, null=False, verbose_name="Permission")
-    date_updated = models.DateTimeField(blank=False, null=False)
+    date_updated = models.DateTimeField(blank=False, null=False, auto_now_add=True)
 
     def __str__(self):
         return '%s %s %s' % (self.user, self.item, self.permission)
