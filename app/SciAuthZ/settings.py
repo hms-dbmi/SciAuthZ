@@ -132,8 +132,10 @@ STATICFILES_FINDERS = (
 # Specific Configs
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': ('rest_framework.permissions.IsAuthenticated',
-                                   'rest_framework.permissions.DjangoModelPermissions'),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.DjangoModelPermissions'
+    ),
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'pyauth0jwtrest.authentication.Auth0JSONWebTokenAuthentication',
@@ -143,16 +145,18 @@ REST_FRAMEWORK = {
 }
 
 AUTH0 = {
-  'CLIENT_ID': os.environ.get("AUTH0_CLIENT_ID"),
-  'DOMAIN': os.environ.get("AUTH0_DOMAIN"),
-  'ALGORITHM': 'RS256',
-  'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'CLIENT_ID': os.environ.get("AUTH0_CLIENT_ID"),
+    'DOMAIN': os.environ.get("AUTH0_DOMAIN"),
+    'ALGORITHM': 'RS256',
+    'JWT_AUTH_HEADER_PREFIX': 'JWT',
+    'AUTHORIZATION_EXTENSION': False,
 }
 
 AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
 
 AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
 
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
 AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID")
 AUTH0_SECRET = os.environ.get("AUTH0_SECRET")
 AUTH0_SUCCESS_URL = os.environ.get("AUTH0_SUCCESS_URL")
