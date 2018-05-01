@@ -18,9 +18,7 @@ TEST_USERS = {"user1":
                   }}
 
 
-
 class CreateUserTest(APITestCase):
-
 
     def setUp(self):
         self.superuser = User.objects.create_superuser(TEST_USERS["user1"]["username"], TEST_USERS["user1"]["username"], '')
@@ -82,3 +80,13 @@ class CreateUserTest(APITestCase):
         pprint(response.json()["results"])
 
         self.assertEqual(1, 1)
+
+    def test_create_authorization_request(self):
+
+        url = "/authorization_requests/"
+
+        client = APIClient()
+        client.login(username=TEST_USERS["user1"]["username"], password='', email=TEST_USERS["user1"]["username"])
+        response = client.post(url, {"user": TEST_USERS["user1"]["username"], "item": "BERSON"})
+
+        self.assertEqual(response.status_code, 201)
