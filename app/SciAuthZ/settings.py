@@ -144,8 +144,14 @@ REST_FRAMEWORK = {
     'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S'
 }
 
+AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
+AUTH0_CLIENT_ID_LIST = os.environ.get("AUTH0_CLIENT_ID_LIST").split(",")
+AUTH0_SECRET = os.environ.get("AUTH0_SECRET")
+AUTH0_SUCCESS_URL = os.environ.get("AUTH0_SUCCESS_URL")
+AUTH0_LOGOUT_URL = os.environ.get("AUTH0_LOGOUT_URL")
+
 AUTH0 = {
-    'CLIENT_ID': os.environ.get("AUTH0_CLIENT_ID"),
+    'CLIENT_ID_LIST': AUTH0_CLIENT_ID_LIST,
     'DOMAIN': os.environ.get("AUTH0_DOMAIN"),
     'ALGORITHM': 'RS256',
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
@@ -155,13 +161,6 @@ AUTH0 = {
 AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
 
 AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
-
-AUTH0_DOMAIN = os.environ.get("AUTH0_DOMAIN")
-AUTH0_CLIENT_ID = os.environ.get("AUTH0_CLIENT_ID") # TODO remove once py-auth0-jwt(-rest) package(s) are upgraded
-AUTH0_CLIENT_ID_LIST = os.environ.get("AUTH0_CLIENT_ID_LIST").split(",")
-AUTH0_SECRET = os.environ.get("AUTH0_SECRET")
-AUTH0_SUCCESS_URL = os.environ.get("AUTH0_SUCCESS_URL")
-AUTH0_LOGOUT_URL = os.environ.get("AUTH0_LOGOUT_URL")
 
 #########
 
