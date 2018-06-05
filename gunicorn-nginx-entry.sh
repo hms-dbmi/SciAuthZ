@@ -2,7 +2,7 @@
 
 DJANGO_SECRET=$(aws ssm get-parameters --names $PS_PATH.django_secret --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 AUTH0_DOMAIN_VAULT=$(aws ssm get-parameters --names $PS_PATH.auth0_domain --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
-AUTH0_CLIENT_ID_VAULT=$(aws ssm get-parameters --names $PS_PATH.auth0_client_id --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+AUTH0_CLIENT_ID_LIST=$(aws ssm get-parameters --names $PS_PATH.auth0_client_id_list --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 AUTH0_SECRET_VAULT=$(aws ssm get-parameters --names $PS_PATH.auth0_secret --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 AUTHENTICATION_LOGIN_URL=$(aws ssm get-parameters --names $PS_PATH.authentication_login_url --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
@@ -23,7 +23,7 @@ RAVEN_URL=$(aws ssm get-parameters --names $PS_PATH.raven_url --with-decryption 
 
 export SECRET_KEY=$DJANGO_SECRET
 export AUTH0_DOMAIN=$AUTH0_DOMAIN_VAULT
-export AUTH0_CLIENT_ID=$AUTH0_CLIENT_ID_VAULT
+export AUTH0_CLIENT_ID_LIST=$AUTH0_CLIENT_ID_LIST
 export AUTH0_SECRET=$AUTH0_SECRET_VAULT
 export AUTHENTICATION_LOGIN_URL
 
