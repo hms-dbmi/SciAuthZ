@@ -154,21 +154,28 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
     def create_registration_permission_record(self, request):
 
         grantee = request.data['grantee_email']
+        item = request.data['item']
 
-        logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Creating profile permission for user %s' % request.user.email)
-
-        item_permission_string = "SciReg.n2c2-t1.profile." + request.user.email
+        item_permission_string = "SciReg." + item + ".profile." + request.user.email
         object_permission = "VIEW"
+
+        logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Creating {object} {perm} permission for user {user}.'.format(
+            object=item_permission_string,
+            perm=object_permission,
+            user=request.user.email
+        ))
 
         grantee_user, created = User.objects.get_or_create(username=grantee, email=grantee)
 
         if created:
             logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Created Grantee %s' % grantee_user)
 
-        new_user_permission, created = UserPermission.objects.get_or_create(item=item_permission_string,
-                                                                            user=grantee_user,
-                                                                            permission=object_permission,
-                                                                            date_updated=datetime.now())
+        new_user_permission, created = UserPermission.objects.get_or_create(
+            item=item_permission_string,
+            user=grantee_user,
+            permission=object_permission,
+            date_updated=datetime.now()
+        )
 
         logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Created %s' % new_user_permission)
 
