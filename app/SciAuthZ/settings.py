@@ -138,8 +138,7 @@ REST_FRAMEWORK = {
     ),
     'PAGE_SIZE': 10,
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'pyauth0jwtrest.authentication.Auth0JSONWebTokenAuthentication',
-        'rest_framework.authentication.SessionAuthentication'
+        'pyauth0jwtrest.authentication.Auth0JSONWebTokenAuthentication'
     ),
     'DATETIME_FORMAT': '%Y-%m-%dT%H:%M:%S'
 }
