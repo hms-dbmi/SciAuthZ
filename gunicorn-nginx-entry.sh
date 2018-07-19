@@ -16,8 +16,6 @@ EMAIL_HOST_USER=$(aws ssm get-parameters --names $PS_PATH.email_host_user --with
 EMAIL_HOST_PASSWORD=$(aws ssm get-parameters --names $PS_PATH.email_host_password --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 EMAIL_PORT=$(aws ssm get-parameters --names $PS_PATH.email_port --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
-FIRST_ADMIN_EMAIL=$(aws ssm get-parameters --names $PS_PATH.first_admin_email --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
-
 ALLOWED_HOSTS=$(aws ssm get-parameters --names $PS_PATH.allowed_hosts --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 RAVEN_URL=$(aws ssm get-parameters --names $PS_PATH.raven_url --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
@@ -58,8 +56,6 @@ fi
 
 python manage.py migrate
 python manage.py collectstatic --no-input
-python manage.py loaddata authorization
-python manage.py shell -c "from django.contrib.auth.models import User; User.objects.create_superuser('$FIRST_ADMIN_EMAIL', '$FIRST_ADMIN_EMAIL', '')" || echo "Super User already exists."
 
 /etc/init.d/nginx restart
 
