@@ -63,6 +63,13 @@ def get_authorized_user_permissions(requesting_user, requested_user=None, record
 
     return permission_records
 
+def get_email_from_jwt(request):
+    """
+    This function encapsulates the pyauth0jwtrest.utils.get_email_from_request() function
+    to make it easier to mock it in our unit tests.
+    """
+
+    return get_email_from_request(request)
 
 class UserPermissionViewSet(viewsets.ModelViewSet):
     """
@@ -75,7 +82,7 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
 
         # Get the username (email) from the JWT
-        request_by_email = get_email_from_request(self.request)
+        request_by_email = get_email_from_jwt(self.request)
 
         # All the possible parameters we will accept
         record_id = self.request.query_params.get('id', None)
@@ -91,7 +98,7 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         """
 
         # Get the username (email) from the JWT
-        request_by_email = get_email_from_request(self.request)
+        request_by_email = get_email_from_jwt(self.request)
 
         # The person getting the VIEW permission
         grantee = request.data['grantee_email']
@@ -124,20 +131,17 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         """
 
         # Get the username (email) from the JWT
-        request_by_email = get_email_from_request(self.request)
+        request_by_email = get_email_from_jwt(self.request)
 
         # The person getting the VIEW permission
         grantee = request.data['grantee_email']
         item = request.data['item']
         object_permission = "VIEW"
 
-        # The person who authorizing this, presumably an admin or manager of the item
-        requesting_user = request.user
-
         logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Removing VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, request_by_email))
 
         # If the user does not have MANAGE permissions of the item, return 401
-        if UserPermission.objects.filter(item=item, user_email=requesting_user, permission="MANAGE").count() < 1:
+        if UserPermission.objects.filter(item=item, user_email=request_by_email, permission="MANAGE").count() < 1:
             logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Failed to remove VIEW permission. %s is not authorized to do this.' % request_by_email)
             return Response('User is not authorized to remove this permission.', status=status.HTTP_401_UNAUTHORIZED)
 
@@ -159,12 +163,12 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         """
 
         # Get the username (email) from the JWT
-        request_by_email = get_email_from_request(self.request)
+        request_by_email = get_email_from_jwt(self.request)
 
         grantee = request.data['grantee_email']
         item = request.data['item']
 
-        item_permission_string = "SciReg." + item + ".profile." + request.user.email
+        item_permission_string = "SciReg." + item + ".profile." + request_by_email
         object_permission = "VIEW"
 
         logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Creating {object} {perm} permission for user {user}.'.format(
