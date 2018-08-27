@@ -155,11 +155,14 @@ AUTH0 = {
     'ALGORITHM': 'RS256',
     'JWT_AUTH_HEADER_PREFIX': 'JWT',
     'AUTHORIZATION_EXTENSION': False,
+    'CREATE_USERS': False,
 }
 
 AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
 
 AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
+
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN")
 
 #########
 

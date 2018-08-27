@@ -5,20 +5,13 @@ from django.db import models
 import os
 
 class UserPermissionSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(slug_field='username', read_only=False, queryset=User.objects.all())
+    # user = serializers.SlugRelatedField(slug_field='username', read_only=False, queryset=User.objects.all())
 
     class Meta:
         model = UserPermission
-        fields = ('id', 'user', 'item', 'permission', 'date_updated')
+        fields = ('id', 'user_email', 'item', 'permission', 'date_updated')
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ('id', 'email', 'first_name', 'last_name', 'password', 'is_superuser')
-
-class PermissionRequestSerializer(serializers.ModelSerializer):
-    user = serializers.SlugRelatedField(slug_field='username', read_only=False, queryset=User.objects.all())
-    
-    class Meta:
-        model = UserPermissionRequest
-        fields = ('id', 'user', 'item', 'date_requested', 'request_granted', 'date_request_granted')

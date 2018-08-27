@@ -5,6 +5,7 @@ AUTH0_DOMAIN_VAULT=$(aws ssm get-parameters --names $PS_PATH.auth0_domain --with
 AUTH0_CLIENT_ID_LIST=$(aws ssm get-parameters --names $PS_PATH.auth0_client_id_list --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 AUTH0_SECRET_VAULT=$(aws ssm get-parameters --names $PS_PATH.auth0_secret --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 AUTHENTICATION_LOGIN_URL=$(aws ssm get-parameters --names $PS_PATH.authentication_login_url --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
+COOKIE_DOMAIN=$(aws ssm get-parameters --names $PS_PATH.cookie_domain --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
 MYSQL_USERNAME_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_username --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 MYSQL_PASSWORD_VAULT=$(aws ssm get-parameters --names $PS_PATH.mysql_pw --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
@@ -19,11 +20,13 @@ EMAIL_PORT=$(aws ssm get-parameters --names $PS_PATH.email_port --with-decryptio
 ALLOWED_HOSTS=$(aws ssm get-parameters --names $PS_PATH.allowed_hosts --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 RAVEN_URL=$(aws ssm get-parameters --names $PS_PATH.raven_url --with-decryption --region us-east-1 | jq -r '.Parameters[].Value')
 
+
 export SECRET_KEY=$DJANGO_SECRET
 export AUTH0_DOMAIN=$AUTH0_DOMAIN_VAULT
 export AUTH0_CLIENT_ID_LIST=$AUTH0_CLIENT_ID_LIST
 export AUTH0_SECRET=$AUTH0_SECRET_VAULT
 export AUTHENTICATION_LOGIN_URL
+export COOKIE_DOMAIN
 
 export MYSQL_USERNAME=$MYSQL_USERNAME_VAULT
 export MYSQL_PASSWORD=$MYSQL_PASSWORD_VAULT
