@@ -162,6 +162,8 @@ AUTHENTICATION_LOGIN_URL = os.environ.get("AUTHENTICATION_LOGIN_URL")
 
 AUTHENTICATION_BACKENDS = ('pyauth0jwt.auth0authenticate.Auth0Authentication', 'django.contrib.auth.backends.ModelBackend')
 
+COOKIE_DOMAIN = os.environ.get("COOKIE_DOMAIN")
+
 #########
 
 DEFAULT_FROM_EMAIL = 'sciauthz-no-reply@dbmi.hms.harvard.edu'
