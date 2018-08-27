@@ -23,8 +23,6 @@ from .views import ht
 
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
-router.register(r'authorization_requests', views.PermissionRequestsViewSet)
-router.register(r'authorization_request_change', views.PermissionRequestsChangeViewSet)
 router.register(r'user_permission', views.UserPermissionViewSet)
 
 urlpatterns = [

@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from rest_framework import viewsets
 from rest_framework import permissions
 from rest_framework import generics
@@ -5,14 +7,15 @@ from rest_framework import status
 from rest_framework.decorators import list_route
 from rest_framework.decorators import detail_route
 from rest_framework.response import Response
+
 from authorization.serializers import UserPermissionSerializer
 from authorization.serializers import UserSerializer
-from authorization.serializers import PermissionRequestSerializer
 from authorization.models import UserPermission
 from authorization.models import UserPermissionRequest
-from authorization.permissions import IsAssociatedUser
+
 from pyauth0jwt.auth0authenticate import user_auth_and_jwt
-from datetime import datetime
+from pyauth0jwtrest.utils import get_email_from_request
+
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
@@ -23,47 +26,42 @@ logger = logging.getLogger(__name__)
 
 @user_auth_and_jwt
 def login(request):
-    return HttpResponse("SENT")
+    """
+    Method exists only to enable access to admin panel which requires session auth.
+    """
+    return HttpResponse("LOGGED IN.")
 
+def get_authorized_user_permissions(requesting_user, requested_user=None, record_id=None, item=None):
+    """
+    Returns a QuerySet of UserPermission records that the requesting_user is authorized to see. A request
+    can include a requested_user (permissions that someone else has), a record_id (the ID of a UserPermission),
+    or an item (the permission string). If the request does not include any of these parameters, only the
+    permissions that pertain to the user should be returned.
+    """
 
-def get_objects_with_permissions(requested_object_type, requesting_user, requested_user, record_id=None, item=None):
+    if not requested_user and not record_id and not item:
+        return UserPermission.objects.filter(user_email=requesting_user)
 
-    # If a specific record is requested, confirm the requesting user either is the owner of it or
-    # has MANAGE permissions on that kind of item
-    if record_id is not None:
-        # DRF requires we return a QuerySet
-        record_resultset = requested_object_type.objects.filter(id=record_id)
+    permission_records = UserPermission.objects.all()
 
-        if record_resultset is None or record_resultset.count() == 0:
-            return requested_object_type.objects.none()
+    # Get all the possible records the user is requesting
+    if requested_user:
+        permission_records = permission_records.filter(user_email=requested_user)
+    if record_id:
+        permission_records = permission_records.filter(id=record_id)
+    if item:
+        permission_records = permission_records.filter(item=item)
 
-        # There should only be one record since we searched by ID
-        record = record_resultset[0]
+    # Get a list of all the items that the user manages
+    manage_permissions = UserPermission.objects.filter(user_email=requesting_user, permission="MANAGE")
+    managing_items = list(manage_permissions.values_list('item', flat=True).distinct())
 
-        # Is the requesting user the owner of this record? DRF requires we preserve this as a queryset.
-        if record.user.email == requesting_user.email:
-            return record_resultset
-        elif UserPermission.objects.filter(item=record.item, user=requesting_user, permission="MANAGE").count() >= 1:
-            return record_resultset
-        else:
-            return requested_object_type.objects.none()
+    # Check that the user either owns the record or has MANAGE permissions on such an item
+    for record in permission_records:
+        if record.user_email != requesting_user and record.item not in managing_items:
+            permission_records = permission_records.exclude(id=record.id)
 
-    # If an item is specified, check if the user has MANAGE permissions on that item
-    elif item is not None:
-        if UserPermission.objects.filter(item=item, user=requesting_user, permission="MANAGE").count() >= 1:
-            # If a specific user was specified, return all permissions it has for this item
-            if requested_user is not None:
-                return requested_object_type.objects.filter(user__email__iexact=requested_user, item__iexact=item)
-            # Otherwise, return everyone's permissions for this item
-            else:
-                return requested_object_type.objects.filter(item__iexact=item)
-        # If this person does not have MANAGE permissions, then only return permissions for this item that they own
-        else:
-            return requested_object_type.objects.filter(user=requesting_user, item__iexact=item)
-
-    # If no record ID or item was specified, then return only the objects for which the user owns
-    else:
-        return requested_object_type.objects.filter(user=requesting_user)
+    return permission_records
 
 
 class UserPermissionViewSet(viewsets.ModelViewSet):
@@ -72,53 +70,61 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
     """
     queryset = UserPermission.objects.all()
     serializer_class = UserPermissionSerializer
-    permission_classes = (permissions.IsAuthenticated, IsAssociatedUser,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
+
+        # Get the username (email) from the JWT
+        request_by_email = get_email_from_request(self.request)
 
         # All the possible parameters we will accept
         record_id = self.request.query_params.get('id', None)
         item = self.request.query_params.get('item', None)
         requested_user = self.request.query_params.get('email', None)
-        requesting_user = self.request.user
 
-        return get_objects_with_permissions(UserPermission, requesting_user, requested_user, record_id, item)
+        return get_authorized_user_permissions(request_by_email, requested_user, record_id, item)
 
     @list_route(methods=['post'])
     def create_item_view_permission_record(self, request):
+        """
+        Creates a VIEW UserPermission record to a given project for a given user.
+        """
+
+        # Get the username (email) from the JWT
+        request_by_email = get_email_from_request(self.request)
 
         # The person getting the VIEW permission
         grantee = request.data['grantee_email']
         item = request.data['item']
         object_permission = "VIEW"
 
-        # The person who authorizing this, presumably an admin or manager of the item
-        requesting_user = request.user
-
-        logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Creating VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, requesting_user.email))
+        logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Attempting to create VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, request_by_email))
 
         # If the user does not have MANAGE permissions of the item, return 401
-        if UserPermission.objects.filter(item=item, user=requesting_user, permission="MANAGE").count() < 1:
-            logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Failed to create VIEW permission. %s is not authorized to do this.' % requesting_user.email)
+        if UserPermission.objects.filter(item=item, user_email=request_by_email, permission="MANAGE").count() < 1:
+            logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Failed to create VIEW permission. %s is not authorized to do this.' % request_by_email)
             return Response('User is not authorized to create this permission.', status=status.HTTP_401_UNAUTHORIZED)
 
-        grantee_user, created = User.objects.get_or_create(username=grantee, email=grantee)
-
-        if created:
-            logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Created Grantee %s' % grantee_user)
-
         # Add the permission if it does not exist
-        new_user_permission, created = UserPermission.objects.get_or_create(item=item,
-                                                                            user=grantee_user,
-                                                                            permission=object_permission)
+        new_user_permission, created = UserPermission.objects.get_or_create(
+            item=item,
+            user_email=grantee,
+            permission=object_permission
+        )
 
-        logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Created %s' % new_user_permission)
+        logger.debug('[DEBUG][SCIAUTHZ][create_item_view_permission_record] - Sucessfully created VIEW permission for %s on %s.' % (grantee, item))
 
         serializer = self.get_serializer(new_user_permission)
         return Response(serializer.data)
 
     @list_route(methods=['post'])
     def remove_item_view_permission_record(self, request):
+        """
+        Removes a VIEW UserPermission record from a given user for a given project.
+        """
+
+        # Get the username (email) from the JWT
+        request_by_email = get_email_from_request(self.request)
 
         # The person getting the VIEW permission
         grantee = request.data['grantee_email']
@@ -128,21 +134,15 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         # The person who authorizing this, presumably an admin or manager of the item
         requesting_user = request.user
 
-        logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Removing VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, requesting_user.email))
+        logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Removing VIEW permission on item %s for user %s, authorized by %s.' % (item, grantee, request_by_email))
 
         # If the user does not have MANAGE permissions of the item, return 401
-        if UserPermission.objects.filter(item=item, user=requesting_user, permission="MANAGE").count() < 1:
-            logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Failed to remove VIEW permission. %s is not authorized to do this.' % requesting_user.email)
+        if UserPermission.objects.filter(item=item, user_email=requesting_user, permission="MANAGE").count() < 1:
+            logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Failed to remove VIEW permission. %s is not authorized to do this.' % request_by_email)
             return Response('User is not authorized to remove this permission.', status=status.HTTP_401_UNAUTHORIZED)
 
-        try:
-            grantee_user = User.objects.get(username=grantee, email=grantee)
-        except ObjectDoesNotExist:
-            logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Failed to remove VIEW permission. %s user is not in our system.' % grantee)
-            return Response('User does not exist, no permissions for them.', status=status.HTTP_404_NOT_FOUND)
-
         # Remove the permission if it exists
-        permission = get_object_or_404(UserPermission, item=item, user=grantee_user, permission=object_permission)
+        permission = get_object_or_404(UserPermission, item=item, user_email=grantee, permission=object_permission)
         permission.delete()
 
         logger.debug('[DEBUG][SCIAUTHZ][remove_item_view_permission_record] - Removed %s' % permission)
@@ -152,6 +152,14 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
 
     @list_route(methods=['post'])
     def create_registration_permission_record(self, request):
+        """
+        Creates a VIEW UserPermission record for the requesting user's SciReg profile to the given user.
+        Permission checks are not needed because by the nature of sending this request, the user is voluntarily
+        granting someone access to the SciReg profile
+        """
+
+        # Get the username (email) from the JWT
+        request_by_email = get_email_from_request(self.request)
 
         grantee = request.data['grantee_email']
         item = request.data['item']
@@ -162,7 +170,7 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
         logger.debug('[DEBUG][SCIAUTHZ][create_registration_permission_record] - Creating {object} {perm} permission for user {user}.'.format(
             object=item_permission_string,
             perm=object_permission,
-            user=request.user.email
+            user=grantee
         ))
 
         grantee_user, created = User.objects.get_or_create(username=grantee, email=grantee)
@@ -172,7 +180,7 @@ class UserPermissionViewSet(viewsets.ModelViewSet):
 
         new_user_permission, created = UserPermission.objects.get_or_create(
             item=item_permission_string,
-            user=grantee_user,
+            user_email=grantee,
             permission=object_permission,
             date_updated=datetime.now()
         )
@@ -189,43 +197,10 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     """
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = (permissions.IsAuthenticated, IsAssociatedUser,)
+    permission_classes = (permissions.IsAuthenticated,)
 
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(email=user.email)
 
 
-class PermissionRequestsViewSet(viewsets.ModelViewSet):
-    """
-    API View for PermissionRequest Models.
-    """
-    queryset = UserPermissionRequest.objects.all()
-    serializer_class = PermissionRequestSerializer
-    permission_classes = (permissions.IsAuthenticated, IsAssociatedUser)
-
-    def get_queryset(self):
-
-        # All the possible parameters we will accept
-        record_id = self.request.query_params.get('id', None)
-        item = self.request.query_params.get('item', None)
-        requested_user = self.request.query_params.get('email', None)
-        requesting_user = self.request.user
-
-        return get_objects_with_permissions(UserPermissionRequest, requesting_user, requested_user, record_id, item)
-
-    def perform_create(self, serializer):
-        user_email = self.request.user
-        user = User.objects.get(username=user_email)
-        serializer.save(user=user)
-
-
-# NOTE While the IsAssociatedUser permissions here works for PUTs, they are not used for GETs. 
-# Any user can GET all permissions. Is this an issue?
-class PermissionRequestsChangeViewSet(viewsets.ModelViewSet):
-    """
-    API View for PermissionRequest Models designed for PUT requests.
-    """
-    queryset = UserPermissionRequest.objects.all()
-    serializer_class = PermissionRequestSerializer
-    permission_classes = (permissions.IsAuthenticated, IsAssociatedUser)
