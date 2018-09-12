@@ -8,6 +8,7 @@ from django.conf import settings
 import logging
 logger = logging.getLogger(__name__)
 
+
 # TODO Delete
 class UserPermissionRequest(models.Model):
     """
@@ -21,6 +22,7 @@ class UserPermissionRequest(models.Model):
 
     def __str__(self):
         return '%s %s %s' % (self.user, self.item, self.request_granted)
+
 
 class UserPermission(models.Model):
     """

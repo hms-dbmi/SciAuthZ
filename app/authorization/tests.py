@@ -16,7 +16,7 @@ from django.urls import reverse
 from authorization.models import UserPermission
 
 FAKE_ITEM_1 = "Sci.Test"
-FAKE_ITEM_2 = "SciAuthZ.Test"
+FAKE_ITEM_2 = "dbmiauthz.Test"
 FAKE_ITEM_3 = "SciReg.Test"
 
 USER_EMAIL = "user@example.com"
@@ -28,7 +28,7 @@ MANAGER_PASSWORD = "password"
 class UserPermissionTest(APITestCase):
     """
     This class captures various tests related to CRUD actions on the UserPermission model. Authentication
-    in SciAuthZ depends on the presence of a valid JWT in the request header, and from the username field
+    in dbmiauthz depends on the presence of a valid JWT in the request header, and from the username field
     in the JWT the user is determined. However, because getting a valid JWT for unit tests is complicated
     and might require exposing an Auth0 client secret here or changing our Auth0 configuration drastically,
     we can mock the username -- pretending it came from a JWT -- and force authentication without a JWT by

@@ -1,4 +1,4 @@
-"""SciAuthZ URL Configuration
+"""dbmiauthz URL Configuration
 
 The `urlpatterns` list routes URLs to views. For more information please see:
     https://docs.djangoproject.com/en/1.10/topics/http/urls/
@@ -19,7 +19,7 @@ from django.contrib import admin
 
 from rest_framework import routers
 from authorization import views
-from .views import ht
+
 
 router = routers.DefaultRouter()
 router.register(r'user', views.UserViewSet)
@@ -29,6 +29,6 @@ urlpatterns = [
     url(r'^admin/login/', page_not_found, {'exception': Exception('Admin form login disabled.')}),
     url(r'^admin/', admin.site.urls),
     url(r'^login/', views.login),
-    url(r'^ht/', ht),
+    url(r'^healthcheck/?', include('health_check.urls')),
     url(r'^', include(router.urls))
 ]

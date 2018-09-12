@@ -1,4 +1,4 @@
-# SciAuthZ
+# dbmiauthz
 
 This Django app is a dirt simple service to enable the most basic research project authorization.
 
@@ -19,4 +19,4 @@ JWT_AUTH = {
 ~~~
 
 ### Running Tests
-python manage.py test authorization.tests --settings SciAuthZ.test_settings
+python manage.py test authorization.tests --settings dbmiauthz.test_settings
