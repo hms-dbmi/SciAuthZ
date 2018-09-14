@@ -119,7 +119,7 @@ STATIC_URL = '/static/'
 
 # THIS IS WHERE FILES ARE COLLECTED FROM
 STATICFILES_DIRS = (
-    normpath(join(DJANGO_ROOT, 'static')),
+    # No static files for now, enable this when needed: normpath(join(DJANGO_ROOT, 'static')),
 )
 
 STATICFILES_FINDERS = (
