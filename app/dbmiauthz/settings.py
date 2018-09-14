@@ -143,54 +143,10 @@ REST_FRAMEWORK = {
 
 AUTH0_DOMAIN = ENV_STR("AUTH0_DOMAIN")
 AUTH0_CLIENT_ID_LIST = ENV_LIST("AUTH0_CLIENT_ID_LIST")
-AUTH0_SECRET = ENV_STR("AUTH0_SECRET")
-AUTH0_SUCCESS_URL = ENV_STR("AUTH0_SUCCESS_URL")
-AUTH0_LOGOUT_URL = ENV_STR("AUTH0_LOGOUT_URL")
-
 AUTHENTICATION_LOGIN_URL = ENV_STR("AUTHENTICATION_LOGIN_URL")
-
 COOKIE_DOMAIN = ENV_STR("COOKIE_DOMAIN")
 
 #########
-
-DEFAULT_FROM_EMAIL = 'dbmiauthz-no-reply@dbmi.hms.harvard.edu'
-EMAIL_BACKEND = ENV_STR('EMAIL_BACKEND', 'django_smtp_ssl.SSLEmailBackend')
-EMAIL_USE_SSL = EMAIL_BACKEND == 'django_smtp_ssl.SSLEmailBackend'
-EMAIL_HOST = ENV_STR("EMAIL_HOST")
-EMAIL_HOST_USER = ENV_STR("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = ENV_STR("EMAIL_HOST_PASSWORD")
-EMAIL_PORT = ENV_STR("EMAIL_PORT")
-
-LOGGING = {
-    'version': 1,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-            'stream': sys.stdout,
-        },
-        'file_debug': {
-            'level': 'DEBUG',
-            'class': 'logging.FileHandler',
-            'filename': 'debug.log',
-        },
-        'file_error': {
-            'level': 'ERROR',
-            'class': 'logging.FileHandler',
-            'filename': 'error.log',
-        }
-    },
-    'root': {
-        'handlers': ['console', 'file_debug'],
-        'level': 'DEBUG'
-    },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file_error'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-    },
-}
 
 RAVEN_URL = ENV_STR('RAVEN_URL')
 if RAVEN_URL:
@@ -203,6 +159,54 @@ if RAVEN_URL:
     }
 
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
+#########
+# Logging
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'console': {
+            'format': '[DBMIAuthz] - [%(asctime)s][%(levelname)s]'
+                      '[%(name)s.%(funcName)s:%(lineno)d] - %(message)s',
+        },
+    },
+    'handlers': {
+        'sentry': {
+            'level': 'ERROR',  # To capture more than ERROR, change to WARNING, INFO, etc.
+            'class': 'raven.contrib.django.raven_compat.handlers.SentryHandler',
+            'tags': {'custom-tag': 'x'},
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'console',
+            'stream': sys.stdout,
+        }
+    },
+    'root': {
+        'handlers': ['console', 'sentry', ],
+        'level': 'DEBUG',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', ],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+        'raven': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+        'sentry.errors': {
+            'level': 'WARNING',
+            'handlers': ['console'],
+            'propagate': False,
+        },
+    },
+}
+###
 
 try:
     from .local_settings import *
