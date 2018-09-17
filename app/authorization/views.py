@@ -11,7 +11,6 @@ from rest_framework.response import Response
 from authorization.serializers import UserPermissionSerializer
 from authorization.serializers import UserSerializer
 from authorization.models import UserPermission
-from authorization.models import UserPermissionRequest
 
 from pyauth0jwt.auth0authenticate import user_auth_and_jwt
 from pyauth0jwtrest.utils import get_email_from_request
@@ -206,5 +205,3 @@ class UserViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         user = self.request.user
         return User.objects.filter(email=user.email)
-
-
