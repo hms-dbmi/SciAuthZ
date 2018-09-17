@@ -1,4 +1,4 @@
-from authorization.models import UserPermission, UserPermissionRequest
+from authorization.models import UserPermission
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from django.db import models

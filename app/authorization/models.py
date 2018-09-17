@@ -8,20 +8,6 @@ from django.conf import settings
 import logging
 logger = logging.getLogger(__name__)
 
-# TODO Delete
-class UserPermissionRequest(models.Model):
-    """
-    This represents a user requesting permission to a specific project.
-    """
-    user = models.ForeignKey(User)
-    item = models.CharField(max_length=100, blank=False, null=False, verbose_name="Item")
-    date_requested = models.DateTimeField(auto_now_add=True)
-    request_granted = models.BooleanField(default=False, blank=True)
-    date_request_granted = models.DateTimeField(default=None, null=True, blank=True)
-
-    def __str__(self):
-        return '%s %s %s' % (self.user, self.item, self.request_granted)
-
 class UserPermission(models.Model):
     """
     This is the granting of permission to a user for a specific project.
