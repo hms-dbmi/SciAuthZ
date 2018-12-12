@@ -58,7 +58,7 @@ def get_authorized_user_permissions(requesting_user, requested_user=None, record
 
     # Check that the user either owns the record or has MANAGE permissions on such an item
     for record in permission_records:
-        if record.user_email != requesting_user and record.item not in managing_items:
+        if record.user_email.lower() != requesting_user.lower() and record.item not in managing_items:
             permission_records = permission_records.exclude(id=record.id)
 
     return permission_records
